@@ -90,8 +90,13 @@ namespace GoogleMobileAds.Unity
             buttonBehaviour = new ButtonBehaviour();
         }
 
+        public void CreateRewardedAd()
+        {
+            
+        }
+
         // Load a rewarding ad.
-        public virtual void LoadAd(AdRequest request)
+        public virtual void LoadAd(string adUnitId, AdRequest request)
         {
             if (Screen.width > Screen.height) //Landscape
             {
@@ -120,20 +125,7 @@ namespace GoogleMobileAds.Unity
                 }
             }
         }
-
-        // Determines whether the rewarded ad has loaded.
-        public bool IsLoaded()
-        {
-            if (prefabAd != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
+        
         // Returns the reward item for the loaded rewarded ad.
         public Reward GetRewardItem()
         {
@@ -147,7 +139,7 @@ namespace GoogleMobileAds.Unity
         // Shows the rewarding ad on the screen.
         public void Show()
         {
-            if (IsLoaded() == true)
+            if (prefabAd != null)
             {
                 dummyAd = AdBehaviour.ShowAd(prefabAd, new Vector3(0, 0, 1));
                 AdBehaviour.PauseGame();

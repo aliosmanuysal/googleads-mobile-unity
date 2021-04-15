@@ -244,7 +244,7 @@
   }
 }
 
-- (void)adView:(GADBannerView *)view didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void)adView:(GADBannerView *)view didFailToReceiveAdWithError:(NSError *)error {
   if (self.adFailedCallback) {
     self.adFailedCallback(self.bannerClient, (__bridge GADUTypeErrorRef)error);
   }

@@ -20,11 +20,15 @@ namespace GoogleMobileAds.Api
     public class RewardedAd
     {
         private IRewardedAdClient client;
+        private string adUnitId;
+        private bool isLoaded;
 
         public RewardedAd(string adUnitId)
         {
             this.client = MobileAds.GetClientFactory().BuildRewardedAdClient();
-            client.CreateRewardedAd(adUnitId);
+            this.adUnitId = adUnitId;
+            this.isLoaded = false;
+            client.CreateRewardedAd();
 
             this.client.OnAdLoaded += (sender, args) =>
             {
@@ -32,6 +36,7 @@ namespace GoogleMobileAds.Api
                 {
                     this.OnAdLoaded(this, args);
                 }
+                this.isLoaded = true;
             };
 
             this.client.OnAdFailedToLoad += (sender, args) =>
@@ -46,7 +51,7 @@ namespace GoogleMobileAds.Api
                 }
             };
 
-            this.client.OnAdFailedToShow += (sender, args) =>
+            this.client.OnAdFailedToPresentFullScreenContent += (sender, args) =>
             {
                 if (this.OnAdFailedToShow != null)
                 {
@@ -59,19 +64,40 @@ namespace GoogleMobileAds.Api
                 }
             };
 
-            this.client.OnAdOpening += (sender, args) =>
+            this.client.OnAdDidPresentFullScreenContent += (sender, args) =>
             {
                 if (this.OnAdOpening != null)
                 {
                     this.OnAdOpening(this, args);
                 }
+                this.isLoaded = false;
             };
 
-            this.client.OnAdClosed += (sender, args) =>
+            this.client.OnAdDidDismissFullScreenContent += (sender, args) =>
             {
                 if (this.OnAdClosed != null)
                 {
                     this.OnAdClosed(this, args);
+                }
+            };
+            
+            this.client.OnAdFailedToPresentFullScreenContent += (sender, args) =>
+            {
+                if (this.OnAdFailedToShow != null)
+                {
+                    AdError adError = new AdError(args.AdErrorClient);
+                    this.OnAdFailedToShow(this, new AdErrorEventArgs()
+                    {
+                        AdError = adError
+                    });
+                }
+            };
+
+            this.client.OnAdDidRecordImpression += (sender, args) =>
+            {
+                if (this.OnAdDidRecordImpression != null)
+                {
+                    this.OnAdDidRecordImpression(this, args);
                 }
             };
 
@@ -98,11 +124,13 @@ namespace GoogleMobileAds.Api
 
         public event EventHandler<AdFailedToLoadEventArgs> OnAdFailedToLoad;
 
-        public event EventHandler<AdErrorEventArgs> OnAdFailedToShow;
-
         public event EventHandler<EventArgs> OnAdOpening;
 
         public event EventHandler<EventArgs> OnAdClosed;
+
+        public event EventHandler<AdErrorEventArgs> OnAdFailedToShow;
+
+        public event EventHandler<EventArgs> OnAdDidRecordImpression;
 
         public event EventHandler<Reward> OnUserEarnedReward;
 
@@ -112,13 +140,13 @@ namespace GoogleMobileAds.Api
         // Loads a new rewarded ad.
         public void LoadAd(AdRequest request)
         {
-            client.LoadAd(request);
+            client.LoadAd(this.adUnitId, request);
         }
 
         // Determines whether the rewarded ad has loaded.
         public bool IsLoaded()
         {
-            return client.IsLoaded();
+            return this.isLoaded;
         }
 
         // Shows the rewarded ad.
@@ -136,11 +164,17 @@ namespace GoogleMobileAds.Api
         // Returns the reward item for the loaded rewarded ad.
         public Reward GetRewardItem()
         {
-            if (client.IsLoaded())
+            if (this.isLoaded)
             {
                 return client.GetRewardItem();
             }
             return null;
+        }
+
+        // Destroys the RewardedlAd.
+        public void Destroy()
+        {
+            client.DestroyRewardedAd();
         }
 
         // Returns ad request response info.
@@ -148,6 +182,5 @@ namespace GoogleMobileAds.Api
         {
             return new ResponseInfo(this.client.GetResponseInfoClient());
         }
-
     }
 }

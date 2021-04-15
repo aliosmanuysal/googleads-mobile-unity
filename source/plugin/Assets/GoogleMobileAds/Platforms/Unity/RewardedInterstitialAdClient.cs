@@ -25,6 +25,21 @@ namespace GoogleMobileAds.Unity
 {
     public class RewardedInterstitialAdClient : RewardingAdBaseClient, IRewardedInterstitialAdClient
     {
+        public event EventHandler<EventArgs> OnAdLoaded;
+
+        public event EventHandler<LoadAdErrorClientEventArgs> OnAdFailedToLoad;
+
+        public event EventHandler<Reward> OnUserEarnedReward;
+
+        public event EventHandler<AdValueEventArgs> OnPaidEvent;
+
+        public event EventHandler<AdErrorClientEventArgs> OnAdFailedToPresentFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidPresentFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidRecordImpression;
 
         // Creates a rewarded ad.
         public void CreateRewardedInterstitialAd()
@@ -33,9 +48,9 @@ namespace GoogleMobileAds.Unity
         }
 
         // Load a rewarded interstial ad.
-        public void LoadAd(string adUnitID, AdRequest request)
+        public void LoadAd(string adUnitId, AdRequest request)
         {
-            base.LoadAd(request);
+            base.LoadAd(adUnitId, request);
         }
     }
 }

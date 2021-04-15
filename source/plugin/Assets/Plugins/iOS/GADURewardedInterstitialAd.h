@@ -36,6 +36,10 @@
 @property(nonatomic, assign)
     GADUDidDismissFullScreenContentCallback adDidDismissFullScreenContentCallback;
 
+/// The ad impression callback into Unity.
+@property(nonatomic, assign)
+GADUDidRecordImpressionCallback adDidRecordImpressionCallback;
+
 /// The user was rewarded callback into Unity.
 @property(nonatomic, assign) GADUUserEarnedRewardCallback didEarnRewardCallback;
 

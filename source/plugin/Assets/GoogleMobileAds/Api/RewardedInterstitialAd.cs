@@ -57,6 +57,14 @@ namespace GoogleMobileAds.Api
                 }
             };
 
+            this.rewardedInterstitialAdClient.OnAdDidRecordImpression += (sender, args) =>
+            {
+                if (this.OnAdDidRecordImpression != null)
+                {
+                    this.OnAdDidRecordImpression(this, args);
+                }
+            };
+
             this.rewardedInterstitialAdClient.OnPaidEvent += (sender, args) =>
             {
                 if (this.OnPaidEvent != null)
@@ -75,6 +83,8 @@ namespace GoogleMobileAds.Api
         public event EventHandler<EventArgs> OnAdDidPresentFullScreenContent;
 
         public event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidRecordImpression;
 
 
         // Loads a new rewarded interstitial ad.

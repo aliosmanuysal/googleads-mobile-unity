@@ -25,30 +25,37 @@ namespace GoogleMobileAds.Unity
 {
     public class RewardedAdClient : RewardingAdBaseClient, IRewardedAdClient
     {
-        // Ad event fired when the rewarded ad is opened.
-        public event EventHandler<EventArgs> OnAdOpening;
-        // Ad event fired when the rewarded ad is closed.
-        public event EventHandler<EventArgs> OnAdClosed;
-        // Ad event fired when the rewarded ad has failed to load.
-        public new event EventHandler<LoadAdErrorClientEventArgs> OnAdFailedToLoad;
-        // Ad event fired when the rewarded ad has failed to show.
-        public event EventHandler<AdErrorClientEventArgs> OnAdFailedToShow;
+        public event EventHandler<EventArgs> OnAdLoaded;
+
+        public event EventHandler<LoadAdErrorClientEventArgs> OnAdFailedToLoad;
+
+        public event EventHandler<Reward> OnUserEarnedReward;
+
+        public event EventHandler<AdValueEventArgs> OnPaidEvent;
+
+        public event EventHandler<AdErrorClientEventArgs> OnAdFailedToPresentFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidPresentFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
+
+        public event EventHandler<EventArgs> OnAdDidRecordImpression;
 
         // Load a rewarded ad.
-        public override void LoadAd(AdRequest request)
+        public override void LoadAd(string adUnitId, AdRequest request)
         {
-            base.LoadAd(request);
-            if (OnAdOpening != null)
+            base.LoadAd(adUnitId, request);
+            if (OnAdDidPresentFullScreenContent != null)
             {
-                OnAdDidPresentFullScreenContent += OnAdOpening;
+                OnAdDidPresentFullScreenContent += OnAdDidPresentFullScreenContent;
             }
-            if (OnAdClosed != null)
+            if (OnAdDidDismissFullScreenContent != null)
             {
-                OnAdDidDismissFullScreenContent += OnAdClosed;
+                OnAdDidDismissFullScreenContent += OnAdDidDismissFullScreenContent;
             }
-            if (OnAdFailedToShow != null)
+            if (OnAdFailedToPresentFullScreenContent != null)
             {
-                OnAdFailedToPresentFullScreenContent += OnAdFailedToShow;
+                OnAdFailedToPresentFullScreenContent += OnAdFailedToPresentFullScreenContent;
             }
         }
 
@@ -58,6 +65,10 @@ namespace GoogleMobileAds.Unity
 
         }
 
+        public void DestroyRewardedAd()
+        {
+            
+        }
 
     }
 }

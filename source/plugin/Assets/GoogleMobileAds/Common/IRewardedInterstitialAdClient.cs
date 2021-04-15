@@ -36,6 +36,8 @@ namespace GoogleMobileAds.Common
 
         event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
 
+        event EventHandler<EventArgs> OnAdDidRecordImpression;
+
         // Creates a rewarded interstitial ad.
         void CreateRewardedInterstitialAd();
 

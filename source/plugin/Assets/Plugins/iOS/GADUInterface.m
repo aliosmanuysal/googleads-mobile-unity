@@ -228,8 +228,7 @@ GADUTypeBannerRef GADUCreateAnchoredAdaptiveBannerViewWithCustomPosition(
 GADUTypeInterstitialRef GADUCreateInterstitial(GADUTypeInterstitialClientRef *interstitialClient,
                                                const char *adUnitID) {
   GADUInterstitial *interstitial = [[GADUInterstitial alloc]
-      initWithInterstitialClientReference:interstitialClient
-                                 adUnitID:GADUStringFromUTF8String(adUnitID)];
+      initWithInterstitialClientReference:interstitialClient];
   GADUObjectCache *cache = [GADUObjectCache sharedInstance];
   cache[interstitial.gadu_referenceKey] = interstitial;
   return (__bridge GADUTypeInterstitialRef)interstitial;
@@ -239,8 +238,7 @@ GADUTypeInterstitialRef GADUCreateInterstitial(GADUTypeInterstitialClientRef *in
 GADUTypeRewardedAdRef GADUCreateRewardedAd(GADUTypeRewardedAdClientRef *rewardedAdClient,
                                            const char *adUnitID) {
   GADURewardedAd *rewardedAd =
-      [[GADURewardedAd alloc] initWithRewardedAdClientReference:rewardedAdClient
-                                                       adUnitID:GADUStringFromUTF8String(adUnitID)];
+      [[GADURewardedAd alloc] initWithRewardedAdClientReference:rewardedAdClient];
   GADUObjectCache *cache = [GADUObjectCache sharedInstance];
   cache[rewardedAd.gadu_referenceKey] = rewardedAd;
   return (__bridge GADUTypeRewardedAdRef)rewardedAd;
@@ -276,14 +274,18 @@ void GADUSetBannerCallbacks(GADUTypeBannerRef banner,
 void GADUSetInterstitialCallbacks(
     GADUTypeInterstitialRef interstitial, GADUInterstitialDidReceiveAdCallback adReceivedCallback,
     GADUInterstitialDidFailToReceiveAdWithErrorCallback adFailedCallback,
-    GADUInterstitialWillPresentScreenCallback willPresentCallback,
-    GADUInterstitialDidDismissScreenCallback didDismissCallback,
+    GADUDidPresentFullScreenContentCallback adDidPresentCallback,
+                                  GADUFailedToPresentFullScreenContentCallback adFailedToPresentCallback,
+                                  GADUDidDismissFullScreenContentCallback adDidDismissCallback,
+                                  GADUDidRecordImpressionCallback adDidRecordImpressionCallback,
     GADUInterstitialPaidEventCallback paidEventCallback) {
   GADUInterstitial *internalInterstitial = (__bridge GADUInterstitial *)interstitial;
-  internalInterstitial.adReceivedCallback = adReceivedCallback;
+  internalInterstitial.adLoadedCallback = adReceivedCallback;
   internalInterstitial.adFailedCallback = adFailedCallback;
-  internalInterstitial.willPresentCallback = willPresentCallback;
-  internalInterstitial.didDismissCallback = didDismissCallback;
+  internalInterstitial.adDidPresentFullScreenContentCallback = adDidPresentCallback;
+  internalInterstitial.adFailedToPresentFullScreenContentCallback = adFailedToPresentCallback;
+  internalInterstitial.adDidDismissFullScreenContentCallback = adDidDismissCallback;
+  internalInterstitial.adDidRecordImpressionCallback = adDidRecordImpressionCallback;
   internalInterstitial.paidEventCallback = paidEventCallback;
 }
 
@@ -291,16 +293,19 @@ void GADUSetInterstitialCallbacks(
 void GADUSetRewardedAdCallbacks(
     GADUTypeRewardedAdRef rewardedAd, GADURewardedAdDidReceiveAdCallback adReceivedCallback,
     GADURewardedAdDidFailToReceiveAdWithErrorCallback adFailedToLoadCallback,
-    GADURewardedAdDidFailToShowAdWithErrorCallback adFailedToShowCallback,
-    GADURewardedAdDidOpenCallback didOpenCallback, GADURewardedAdDidCloseCallback didCloseCallback,
+                                GADUDidPresentFullScreenContentCallback adDidPresentCallback,
+                                GADUFailedToPresentFullScreenContentCallback adFailedToPresentCallback,
+                                GADUDidDismissFullScreenContentCallback adDidDismissCallback,
+                                GADUDidRecordImpressionCallback adDidRecordImpressionCallback,
     GADUUserEarnedRewardCallback didEarnRewardCallback,
     GADURewardedAdPaidEventCallback paidEventCallback) {
   GADURewardedAd *internalRewardedAd = (__bridge GADURewardedAd *)rewardedAd;
-  internalRewardedAd.adReceivedCallback = adReceivedCallback;
+  internalRewardedAd.adLoadedCallback = adReceivedCallback;
   internalRewardedAd.adFailedToLoadCallback = adFailedToLoadCallback;
-  internalRewardedAd.adFailedToShowCallback = adFailedToShowCallback;
-  internalRewardedAd.didOpenCallback = didOpenCallback;
-  internalRewardedAd.didCloseCallback = didCloseCallback;
+  internalRewardedAd.adDidPresentFullScreenContentCallback = adDidPresentCallback;
+  internalRewardedAd.adFailedToPresentFullScreenContentCallback = adFailedToPresentCallback;
+  internalRewardedAd.adDidDismissFullScreenContentCallback = adDidDismissCallback;
+  internalRewardedAd.adDidRecordImpressionCallback = adDidRecordImpressionCallback;
   internalRewardedAd.didEarnRewardCallback = didEarnRewardCallback;
   internalRewardedAd.paidEventCallback = paidEventCallback;
 }
@@ -315,7 +320,8 @@ void GADUSetRewardedInterstitialAdCallbacks(
     GADURewardedInterstitialAdPaidEventCallback paidEventCallback,
     GADUFailedToPresentFullScreenContentCallback adFailToPresentFullScreenContentCallback,
     GADUDidPresentFullScreenContentCallback adDidPresentFullScreenContentCallback,
-    GADUDidDismissFullScreenContentCallback adDidDismissFullScreenContentCallback) {
+    GADUDidDismissFullScreenContentCallback adDidDismissFullScreenContentCallback,
+                                            GADUDidRecordImpressionCallback adDidRecordImpressionCallback) {
   GADURewardedInterstitialAd *internalRewardedInterstitialAd =
       (__bridge GADURewardedInterstitialAd *)rewardedInterstitialAd;
   internalRewardedInterstitialAd.adLoadedCallback = adLoadedCallback;
@@ -328,6 +334,7 @@ void GADUSetRewardedInterstitialAdCallbacks(
       adDidPresentFullScreenContentCallback;
   internalRewardedInterstitialAd.adDidDismissFullScreenContentCallback =
       adDidDismissFullScreenContentCallback;
+  internalRewardedInterstitialAd.adDidRecordImpressionCallback = adDidRecordImpressionCallback;
 }
 
 /// Sets the GADBannerView's hidden property to YES.
@@ -358,22 +365,10 @@ float GADUGetBannerViewWidthInPixels(GADUTypeBannerRef banner) {
   return internalBanner.widthInPixels;
 }
 
-/// Returns YES if the GADInterstitial is ready to be shown.
-BOOL GADUInterstitialReady(GADUTypeInterstitialRef interstitial) {
-  GADUInterstitial *internalInterstitial = (__bridge GADUInterstitial *)interstitial;
-  return [internalInterstitial isReady];
-}
-
 /// Shows the GADInterstitial.
 void GADUShowInterstitial(GADUTypeInterstitialRef interstitial) {
   GADUInterstitial *internalInterstitial = (__bridge GADUInterstitial *)interstitial;
   [internalInterstitial show];
-}
-
-/// Returns YES if the GADRewardedAd is ready to be shown.
-BOOL GADURewardedAdReady(GADUTypeRewardedAdRef rewardedAd) {
-  GADURewardedAd *internalRewardedAd = (__bridge GADURewardedAd *)rewardedAd;
-  return [internalRewardedAd isReady];
 }
 
 /// Shows the GADRewardedAd.
@@ -385,14 +380,14 @@ void GADUShowRewardedAd(GADUTypeRewardedAdRef rewardedAd) {
 /// Returns the type of the reward.
 const char *GADURewardedAdGetRewardType(GADUTypeRewardedAdRef rewardedAd) {
   GADURewardedAd *internalRewardedAd = (__bridge GADURewardedAd *)rewardedAd;
-  GADAdReward *reward = internalRewardedAd.rewardedAd.reward;
+  GADAdReward *reward = internalRewardedAd.rewardedAd.adReward;
   return cStringCopy(reward.type.UTF8String);
 }
 
 /// Returns the amount of the reward.
 double GADURewardedAdGetRewardAmount(GADUTypeRewardedAdRef rewardedAd) {
   GADURewardedAd *internalRewardedAd = (__bridge GADURewardedAd *)rewardedAd;
-  GADAdReward *reward = internalRewardedAd.rewardedAd.reward;
+  GADAdReward *reward = internalRewardedAd.rewardedAd.adReward;
   return reward.amount.doubleValue;
 }
 
@@ -649,17 +644,19 @@ void GADUSetBannerViewCustomPosition(GADUTypeBannerRef banner, int x, int y) {
 }
 
 /// Makes an interstitial ad request.
-void GADURequestInterstitial(GADUTypeInterstitialRef interstitial, GADUTypeRequestRef request) {
+void GADULoadInterstitialAd(GADUTypeInterstitialRef interstitial, const char *adUnitID, GADUTypeRequestRef request) {
   GADUInterstitial *internalInterstitial = (__bridge GADUInterstitial *)interstitial;
   GADURequest *internalRequest = (__bridge GADURequest *)request;
-  [internalInterstitial loadRequest:[internalRequest request]];
+  [internalInterstitial loadWithAdUnit:GADUStringFromUTF8String(adUnitID)
+                                 request:[internalRequest request]];
 }
 
 /// Makes a rewarded ad request.
-void GADURequestRewardedAd(GADUTypeRewardedAdRef rewardedAd, GADUTypeRequestRef request) {
+void GADULoadRewardedAd(GADUTypeRewardedAdRef rewardedAd, const char *adUnitID, GADUTypeRequestRef request) {
   GADURewardedAd *internalRewardedAd = (__bridge GADURewardedAd *)rewardedAd;
   GADURequest *internalRequest = (__bridge GADURequest *)request;
-  [internalRewardedAd loadRequest:[internalRequest request]];
+  [internalRewardedAd loadWithAdUnitID:GADUStringFromUTF8String(adUnitID)
+                               request:[internalRequest request]];
 }
 
 /// Makes a rewarded interstitial ad request.
@@ -735,38 +732,38 @@ const char *GADUGetResponseInfoDescription(GADUTypeResponseInfoRef responseInfo)
   return cStringCopy(internalResponseInfo.description.UTF8String);
 }
 
-const int GADUGetAdErrorCode(GADUTypeErrorRef error) {
-    GADRequestError *internalError = (__bridge GADRequestError *) error;
-    return internalError.code;
-}
-
-const char *GADUGetAdErrorDomain(GADUTypeErrorRef error) {
-    GADRequestError *internalError = (__bridge GADRequestError *) error;
-    return cStringCopy(internalError.domain.UTF8String);
-}
-
-const char *GADUGetAdErrorMessage(GADUTypeErrorRef error) {
-    GADRequestError *internalError = (__bridge GADRequestError *) error;
-    return cStringCopy(internalError.localizedDescription.UTF8String);
-}
-
-const GADUTypeErrorRef GADUGetAdErrorUnderLyingError(GADUTypeErrorRef error){
-  GADRequestError *internalError = (__bridge GADRequestError *) error;
-  NSError *underlyingError = internalError.userInfo[NSUnderlyingErrorKey];
-  return (__bridge GADUTypeErrorRef)(underlyingError);
-}
-
-const GADUTypeResponseInfoRef GADUGetAdErrorResponseInfo(GADUTypeErrorRef error){
-  GADRequestError *internalError = (__bridge GADRequestError *) error;
-  GADResponseInfo *responseInfo = internalError.userInfo[GADErrorUserInfoKeyResponseInfo];
-  return (__bridge GADUTypeResponseInfoRef)(responseInfo);
-
-}
-
-const char *GADUGetAdErrorDescription(GADUTypeErrorRef error){
-  GADRequestError *internalError = (__bridge GADRequestError *)error;
-  return cStringCopy(internalError.description.UTF8String);
-}
+//const int GADUGetAdErrorCode(GADUTypeErrorRef error) {
+//    NSError *internalError = (__bridge NSError *) error;
+//    return internalError.code;
+//}
+//
+//const char *GADUGetAdErrorDomain(GADUTypeErrorRef error) {
+//    NSError *internalError = (__bridge NSError *) error;
+//    return cStringCopy(internalError.domain.UTF8String);
+//}
+//
+//const char *GADUGetAdErrorMessage(GADUTypeErrorRef error) {
+//    NSError *internalError = (__bridge NSError *) error;
+//    return cStringCopy(internalError.localizedDescription.UTF8String);
+//}
+//
+//const GADUTypeErrorRef GADUGetAdErrorUnderLyingError(GADUTypeErrorRef error){
+//  NSError *internalError = (__bridge NSError *) error;
+//  NSError *underlyingError = internalError.userInfo[NSUnderlyingErrorKey];
+//  return (__bridge GADUTypeErrorRef)(underlyingError);
+//}
+//
+//const GADUTypeResponseInfoRef GADUGetAdErrorResponseInfo(GADUTypeErrorRef error){
+//  NSError *internalError = (__bridge NSError *) error;
+//  GADResponseInfo *responseInfo = internalError.userInfo[GADErrorUserInfoKeyResponseInfo];
+//  return (__bridge GADUTypeResponseInfoRef)(responseInfo);
+//
+//}
+//
+//const char *GADUGetAdErrorDescription(GADUTypeErrorRef error){
+//  NSError *internalError = (__bridge NSError *)error;
+//  return cStringCopy(internalError.description.UTF8String);
+//}
 
 #pragma mark - Other methods
 /// Removes an object from the cache.

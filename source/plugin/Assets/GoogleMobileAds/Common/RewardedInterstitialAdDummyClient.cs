@@ -44,6 +44,8 @@ namespace GoogleMobileAds.Common
 
         public event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
 
+        public event EventHandler<EventArgs> OnAdDidRecordImpression;
+
 
 #pragma warning restore 67
 

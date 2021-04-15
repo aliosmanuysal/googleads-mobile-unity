@@ -1,4 +1,4 @@
-// Copyright (C) 2015 Google, Inc.
+// Copyright (C) 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,30 +24,31 @@ namespace GoogleMobileAds.Common
         event EventHandler<EventArgs> OnAdLoaded;
         // Ad event fired when the interstitial ad has failed to load.
         event EventHandler<LoadAdErrorClientEventArgs> OnAdFailedToLoad;
-        // Ad event fired when the interstitial ad is opened.
-        event EventHandler<EventArgs> OnAdOpening;
-        // Ad event fired when the interstitial ad is closed.
-        event EventHandler<EventArgs> OnAdClosed;
         // Ad event fired when the interstitial ad is estimated to have earned money.
         event EventHandler<AdValueEventArgs> OnPaidEvent;
 
+        // Full screen content events
+        event EventHandler<AdErrorClientEventArgs> OnAdFailedToPresentFullScreenContent;
 
-        // Creates an InterstitialAd.
-        void CreateInterstitialAd(string adUnitId);
+        event EventHandler<EventArgs> OnAdDidPresentFullScreenContent;
 
-        // Loads a new interstitial request.
-        void LoadAd(AdRequest request);
+        event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
 
-        // Determines whether the interstitial has loaded.
-        bool IsLoaded();
+        event EventHandler<EventArgs> OnAdDidRecordImpression;
 
-        // Shows the InterstitialAd.
-        void ShowInterstitial();
+        // Creates a interstitial ad.
+        void CreateInterstitialAd();
 
-        // Destroys an InterstitialAd.
-        void DestroyInterstitial();
+        // Loads a interstitial ad.
+        void LoadAd(string adUnitID, AdRequest request);
+
+        // Shows the interstitial ad on the screen.
+        void Show();
 
         // Returns ad request Response info client.
         IResponseInfoClient GetResponseInfoClient();
+
+        // Destroys the interstitial ad.
+        void DestroyInterstitial();
     }
 }

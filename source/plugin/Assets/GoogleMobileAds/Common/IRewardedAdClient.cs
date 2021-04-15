@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Google, Inc.
+// Copyright (C) 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,25 +24,25 @@ namespace GoogleMobileAds.Common
         event EventHandler<EventArgs> OnAdLoaded;
         // Ad event fired when the rewarded ad has failed to load.
         event EventHandler<LoadAdErrorClientEventArgs> OnAdFailedToLoad;
-        // Ad event fired when the rewarded ad has failed to show.
-        event EventHandler<AdErrorClientEventArgs> OnAdFailedToShow;
-        // Ad event fired when the rewarded ad is opened.
-        event EventHandler<EventArgs> OnAdOpening;
-        // Ad event fired when the rewarded ad has rewarded the user.
-        event EventHandler<Reward> OnUserEarnedReward;
-        // Ad event fired when the rewarded ad is closed.
-        event EventHandler<EventArgs> OnAdClosed;
         // Ad event fired when the rewarded ad is estimated to have earned money.
         event EventHandler<AdValueEventArgs> OnPaidEvent;
+        // Ad event fired when the rewarded ad has rewarded the user.
+        event EventHandler<Reward> OnUserEarnedReward;
+
+        // Full screen content events
+        event EventHandler<AdErrorClientEventArgs> OnAdFailedToPresentFullScreenContent;
+
+        event EventHandler<EventArgs> OnAdDidPresentFullScreenContent;
+
+        event EventHandler<EventArgs> OnAdDidDismissFullScreenContent;
+
+        event EventHandler<EventArgs> OnAdDidRecordImpression;
 
         // Creates a rewarded ad.
-        void CreateRewardedAd(string adUnitId);
+        void CreateRewardedAd();
 
-        // Load a rewarded ad.
-        void LoadAd(AdRequest request);
-
-        // Determines whether the rewarded ad has loaded.
-        bool IsLoaded();
+        // Loads a rewarded ad.
+        void LoadAd(string adUnitID, AdRequest request);
 
         // Returns the reward item for the loaded rewarded ad.
         Reward GetRewardItem();
@@ -55,5 +55,8 @@ namespace GoogleMobileAds.Common
 
         // Returns ad request Response info client.
         IResponseInfoClient GetResponseInfoClient();
+
+        // Destroys the rewarded ad.
+        void DestroyRewardedAd();
     }
 }
